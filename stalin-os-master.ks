@@ -1,5 +1,5 @@
 # language: Kickstart (KS), target: Fedora Workstation Base, arch: x86_64
-# stalin-os-master.ks - Versao Definitiva e Higienizada do Stalin OS
+# stalin-os-master.ks - Versao Definitiva de Producao para o Stalin OS
 
 lang pt_BR.UTF-8
 keyboard br-abnt2
@@ -18,7 +18,10 @@ zerombr
 clearpart --all --initlabel
 autopart --type=btrfs --encrypted --passphrase="stalin_default_secure_pass"
 
-# Fontes de Software Oficiais do Fedora 44 Estavel
+# Metodo de Instalacao Primario Exigido para No-Virt Build
+url --url=https://fedoraproject.org
+
+# Fontes de Software Complementares do Fedora 44 Estavel
 repo --name=fedora --mirrorlist=https://fedoraproject.org
 repo --name=updates --mirrorlist=https://fedoraproject.org
 repo --name=rpmfusion-free --mirrorlist=https://rpmfusion.org
