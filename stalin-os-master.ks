@@ -1,5 +1,5 @@
 # language: Kickstart (KS), target: Fedora Workstation Base, arch: x86_64
-# stalin-os-master.ks - Configuração definitiva de Produção para o Stalin OS
+# stalin-os-master.ks - Definicao Limpa de Producao para o Stalin OS
 
 lang pt_BR.UTF-8
 keyboard br-abnt2
@@ -7,19 +7,18 @@ timezone America/Sao_Paulo --utc
 network --bootproto=dhcp --device=link --activate
 firewall --enabled --service=ssh
 selinux --enforcing
-services --enabled=NetworkManager,gdm,bluetooth,docker
 
-# Credenciais e Contas Administrativas
+# Contas e Autenticacao
 rootpw --plaintext stalin_root_secure
 user --name=camarada --groups=wheel --plaintext --password=stalin_secure_pass --gecos="Camarada"
 
-# Configuração de Bootloader e Parâmetros de Isolamento de Kernel (IOMMU e Desativação de Mitigações)
+# Armazenamento e Inicializacao
 bootloader --location=mbr --boot-drive=sda --append="quiet splash amd_iommu=on intel_iommu=on iommu=pt mitigations=off thread_irqs transparent_hugepage=always"
 zerombr
 clearpart --all --initlabel
 autopart --type=btrfs --encrypted --passphrase="stalin_default_secure_pass"
 
-# Repositórios Oficiais e de Terceiros Corrigidos (Fedora 44 Estável)
+# Fontes de Software Oficiais (Fedora 44)
 repo --name=fedora --mirrorlist=https://fedoraproject.org
 repo --name=updates --mirrorlist=https://fedoraproject.org
 repo --name=rpmfusion-free --mirrorlist=https://rpmfusion.org
@@ -34,7 +33,7 @@ repo --name=vscode --baseurl=https://microsoft.com --enabled=1
 @multimedia
 @sound-and-video
 
-# Produtividade, Escritório e Multimídia
+# Aplicacoes Base
 libreoffice
 libreoffice-langpack-pt-BR
 thunderbird
@@ -44,18 +43,18 @@ inkscape
 obs-studio
 code
 
-# Codecs de Mídia Completos (RPM Fusion & FFmpeg)
+# Pilha de Codecs e Video
 gstreamer1-plugins-bad-free-extras
 gstreamer1-plugins-ugly-free
 gstreamer1-plugins-bad-nonfree
 gstreamer1-plugins-ugly-nonfree
 ffmpeg
 
-# Drivers Proprietários NVIDIA Estáveis
+# Drivers de Hardware NVIDIA
 akmod-nvidia
 xorg-x11-drv-nvidia-cuda
 
-# Stack Completa de Jogos, Runtimes de 32 e 64 Bits e Emulação
+# Camadas de Compatibilidade de Jogos e Runtimes
 steam
 lutris
 gamemode
@@ -78,7 +77,7 @@ gnutls.i686
 libgphoto2.i686
 openal-soft.i686
 
-# Ferramentas de Sistema, Rede e Compilação
+# Ferramentas Universais e Engenharia
 git
 curl
 wget
@@ -100,7 +99,7 @@ cmake
 python3
 python3-pip
 
-# Tipografia e Fontes Globais
+# Fontes do Sistema
 fontawesome-fonts
 dejavu-sans-fonts
 google-noto-fonts-common
@@ -116,53 +115,23 @@ exec > >(tee -a /var/log/stalin-postinstall.log) 2>&1
 
 echo "[Stalin OS] Iniciando pós-processamento automatizado de sistema..."
 
-# Configuração de DNS Estável (Cloudflare)
+# Ajuste estatico de DNS
 echo "nameserver 1.1.1.1" > /etc/resolv.conf
 echo "nameserver 1.0.0.1" >> /etc/resolv.conf
 
-# Adicionar repositório Flathub sistêmico corrigido
+# Ativacao do canal de Flatpaks
 flatpak remote-add --if-not-exists flathub https://flathub.org
 
-# Função de Retry Linear com Backoff Exponencial para Instalação de Flatpaks
-install_flatpak_with_retry() {
-    local app_id=$1
-    local max_attempts=5
-    local attempt=1
-    local delay=10
+# Sincronizacao de Aplicacoes em Background
+flatpak install -y flathub com.discordapp.Discord &
+flatpak install -y flathub com.spotify.Client &
+flatpak install -y flathub io.heroicgameslauncher.hgl &
+flatpak install -y flathub com.usebottles.bottles &
+flatpak install -y flathub org.mozilla.firefox &
 
-    while [ $attempt -le $max_attempts ]; do
-        echo "[Stalin OS] Tentando instalar Flatpak: $app_id (Tentativa $attempt/$max_attempts)..."
-        if flatpak install -y flathub "$app_id"; then
-            echo "[Stalin OS] Sucesso ao instalar o aplicativo $app_id."
-            return 0
-        fi
-        echo "[Stalin OS] Falha na tentativa $attempt para $app_id. Aguardando ${delay} segundos..."
-        sleep $delay
-        attempt=$((attempt + 1))
-        delay=$((delay * 2))
-    done
-
-    echo "[Stalin OS] ERRO: O pacote Flatpak $app_id falhou após $max_attempts tentativas."
-    return 1
-}
-
-# Array de aplicações essenciais para download assíncrono em background
-APPS_FLATPAK=(
-    "com.discordapp.Discord"
-    "com.spotify.Client"
-    "io.heroicgameslauncher.hgl"
-    "com.usebottles.bottles"
-    "org.mozilla.firefox"
-)
-
-for app in "${APPS_FLATPAK[@]}"; do
-    install_flatpak_with_retry "$app" &
-done
-
-# Aguardar a conclusão de todas as threads paralelas de instalação
 wait
 
-# Geração de Identidade Visual em /etc/os-release
+# Identidade Visual do Sistema Operacional
 cat << 'EOF' > /etc/os-release
 NAME="Stalin OS"
 ID="stalinos"
@@ -184,7 +153,7 @@ REDHAT_SUPPORT_PRODUCT_VERSION=44
 SUPPORT_END=2027-10-07
 EOF
 
-# Criação de diretório de configuração do Dconf para o tema escuro padrão
+# Overrides do Banco de Dados Graficos dconf
 mkdir -p /etc/dconf/db/local.d/
 cat << 'EOF' > /etc/dconf/db/local.d/00-stalin-theme
 [org/gnome/desktop/interface]
@@ -196,7 +165,7 @@ picture-uri-dark='file:///usr/share/backgrounds/stalin-os/wallpaper.png'
 EOF
 dconf update
 
-# Injeção de Tuning de Sistema e Memória Virtual
+# Injeccao de Otimizacao de Memoria Virtual
 cat << 'EOF' > /etc/sysctl.d/99-stalin-gaming.conf
 vm.max_map_count = 2147483642
 vm.swappiness = 10
@@ -205,7 +174,7 @@ net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 EOF
 
-# Configuração de Limites de Descritores de Arquivos Abertos
+# Injeccao de Limites de Execucao
 cat << 'EOF' > /etc/security/limits.d/99-stalin-limits.conf
 * soft nofile 524288
 * hard nofile 524288
@@ -213,8 +182,8 @@ root soft nofile 524288
 root hard nofile 524288
 EOF
 
-# Configuração do GameMode do Feral Interactive
-mkdir -p /etc/gamemode.ini
+# Criacao de Perfil do GameMode
+mkdir -p /etc
 cat << 'EOF' > /etc/gamemode.ini
 [general]
 desiredgov=performance
@@ -226,11 +195,11 @@ supervisor=auto
 whitelist=steam,lutris,heroic,gamescope
 EOF
 
-# Habilitação definitiva de Daemons do Systemd
+# Habilitacao de Servicos
 systemctl enable docker
 systemctl enable bluetooth
 systemctl enable gdm
 systemctl enable NetworkManager
 
-echo "[Stalin OS] Script de pós-instalação concluído com êxito."
+echo "[Stalin OS] Arquitetura de pós-instalação concluída."
 %end
