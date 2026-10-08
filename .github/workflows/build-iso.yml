@@ -22,7 +22,14 @@ jobs:
       - name: Execute ISO Build via Livemedia-Creator
         run: |
           mkdir -p build-output
-          livemedia-creator --resultdir=build-output --project="Stalin-OS" --volid="StalinOS-CI-x86_64" --iso --ks=stalin-os-master.ks --nomacboot --make-iso --iso-only
+          livemedia-creator \
+            --resultdir=build-output \
+            --project="Stalin-OS" \
+            --volid="StalinOS-CI-x86_64" \
+            --ks=stalin-os-master.ks \
+            --nomacboot \
+            --make-iso \
+            --iso-only
       - name: Upload ISO Artifacts
         uses: actions/upload-artifact@v4
         with:
