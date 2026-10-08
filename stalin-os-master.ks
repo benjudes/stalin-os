@@ -1,5 +1,5 @@
 # language: Kickstart (KS), target: Fedora Workstation Base, arch: x86_64
-# stalin-os-master.ks - Definicao Limpa de Producao para o Stalin OS
+# stalin-os-master.ks - Versao Definitiva e Higienizada do Stalin OS
 
 lang pt_BR.UTF-8
 keyboard br-abnt2
@@ -18,8 +18,7 @@ zerombr
 clearpart --all --initlabel
 autopart --type=btrfs --encrypted --passphrase="stalin_default_secure_pass"
 
-# Fontes de Software Oficiais (Fedora 44)
-# Fontes de Software Oficiais (Fedora 44)
+# Fontes de Software Oficiais do Fedora 44 Estavel
 repo --name=fedora --mirrorlist=https://fedoraproject.org
 repo --name=updates --mirrorlist=https://fedoraproject.org
 repo --name=rpmfusion-free --mirrorlist=https://rpmfusion.org
@@ -33,6 +32,9 @@ repo --name=vscode --baseurl=https://microsoft.com
 @hardware-support
 @multimedia
 @sound-and-video
+
+# Pacote obrigatorio para gerar Live ISO
+dracut-live
 
 # Aplicacoes Base
 libreoffice
