@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Install Build Dependencies and Tools
-        run: dnf install -y dnf-plugins-core pykickstart livemedia-creator lorax mock git genisoimage squashfs-tools anaconda-imaging
+        run: dnf install -y dnf-plugins-core pykickstart livemedia-creator lorax mock git genisoimage squashfs-tools anaconda
       - name: Validate Kickstart Syntax
         run: ksvalidator stalin-os-master.ks
       - name: Execute ISO Build via Livemedia-Creator
