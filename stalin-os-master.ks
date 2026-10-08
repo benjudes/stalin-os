@@ -19,12 +19,13 @@ clearpart --all --initlabel
 autopart --type=btrfs --encrypted --passphrase="stalin_default_secure_pass"
 
 # Fontes de Software Oficiais (Fedora 44)
+# Fontes de Software Oficiais (Fedora 44)
 repo --name=fedora --mirrorlist=https://fedoraproject.org
 repo --name=updates --mirrorlist=https://fedoraproject.org
 repo --name=rpmfusion-free --mirrorlist=https://rpmfusion.org
 repo --name=rpmfusion-nonfree --mirrorlist=https://rpmfusion.org
 repo --name=winehq --baseurl=https://winehq.org
-repo --name=vscode --baseurl=https://microsoft.com --enabled=1
+repo --name=vscode --baseurl=https://microsoft.com
 
 %packages
 @^gnome-desktop-environment
