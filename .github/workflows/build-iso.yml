@@ -1,0 +1,31 @@
+name: Stalin OS CI/CD Build Pipeline
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+jobs:
+  build-iso:
+    runs-on: ubuntu-24.04
+    container:
+      image: registry.fedoraproject.org/fedora:44
+      options: --privileged
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Build Dependencies and Tools
+        run: dnf install -y dnf-plugins-core pykickstart livemedia-creator lorax mock git genisoimage squashfs-tools
+      - name: Validate Kickstart Syntax
+        run: ksvalidator stalin-os-master.ks
+      - name: Execute ISO Build via Livemedia-Creator
+        run: |
+          mkdir -p build-output
+          livemedia-creator --resultdir=build-output --project="Stalin-OS" --volid="StalinOS-CI-x86_64" --iso --ks=stalin-os-master.ks --nomacboot --make-iso --iso-only
+      - name: Upload ISO Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stalin-os-iso
+          path: build-output/*.iso
+          retention-days: 7
