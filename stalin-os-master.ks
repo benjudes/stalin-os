@@ -12,11 +12,14 @@ selinux --enforcing
 rootpw --plaintext stalin_root_secure
 user --name=camarada --groups=wheel --plaintext --password=stalin_secure_pass --gecos="Camarada"
 
-# Armazenamento e Inicializacao
+# Armazenamento e Particionamento Explicito para No-Virt Build
 bootloader --location=mbr --boot-drive=sda --append="quiet splash amd_iommu=on intel_iommu=on iommu=pt mitigations=off thread_irqs transparent_hugepage=always"
 zerombr
 clearpart --all --initlabel
-autopart --type=btrfs --encrypted --passphrase="stalin_default_secure_pass"
+
+# Definicao exata de particoes para evitar o erro de calculo do Anaconda
+part /boot --fstype="ext4" --size=1024 --ondisk=sda
+part / --fstype="btrfs" --grow --ondisk=sda
 
 # Metodo de Instalacao Primario Exigido para No-Virt Build
 url --url=https://fedoraproject.org
